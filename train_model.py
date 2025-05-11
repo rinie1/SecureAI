@@ -11,7 +11,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,))
 ])
 
-train_dataset = datasets.MNIST(root='.', train=True, download=True, transform=transform)
+train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
 train_loader  = torch.utils.data.DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 # Улучшенная модель: 784 -> 128 -> ReLU -> 10
