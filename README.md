@@ -43,7 +43,7 @@ python server.py
 python client.py
 ```
 
-##Thanks
+## Thanks
 To [teavanist](https://github.com/teavanist/MNIST-JPG/commits?author=teavanist) for big database with MNIST images - [repo with images](https://github.com/teavanist/MNIST-JPG)
 
 ## Docker
