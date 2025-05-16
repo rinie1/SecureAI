@@ -99,16 +99,17 @@ def main():
         args.image = "digit.jpg"
 
         if not os.path.exists(args.image):
-            raise FileNotFoundError(f"Файл {args.image} не найден. Убедитесь, что вы сохранили изображение в холсте.")
+            raise FileNotFoundError(f"File {args.image} not found.")
 
     W1, b1, W2, b2 = load_model_parameters(args.model)
     input_vector = preprocess_image(args.image)
+    
     print("Original image:", input_vector[:10])
+    
     hidden = compute_hidden_layer(W1, b1, input_vector)
     context = setup_tenseal_context()
     r, Wr, enc_hidden = generate_mask_and_encrypted_vector(hidden, W2, context)
 
-    # Уведомление о шифровании данных перед отправкой
     print("Client: Encrypting and sending data to server (user data remains encrypted).")
 
     enc_logits = send_data_to_server(args.host, args.port, context, enc_hidden)
