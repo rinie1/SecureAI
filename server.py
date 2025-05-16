@@ -4,9 +4,6 @@ import tenseal as ts
 import argparse
 
 def recv_exact(sock, n):
-    """
-    Receive exactly n bytes from the socket.
-    """
     data = b''
     while len(data) < n:
         packet = sock.recv(n - len(data))
@@ -16,58 +13,37 @@ def recv_exact(sock, n):
     return data
 
 def load_model_parameters(model_path):
-    """
-    Load model parameters (weights and biases) from a .npz file.
-    """
     data = np.load(model_path)
-    W2 = data['W2']  # Weights for the second layer (shape: 10 x 128)
-    b2 = data['b2']  # Biases for the second layer (shape: 10,)
+    W2 = data['W2']
+    b2 = data['b2']
     return W2, b2
 
 def receive_context_and_encrypted_vector(conn):
-    """
-    Receive the TenSEAL context and the encrypted hidden vector from the client.
-    """
-    # Receive and deserialize the TenSEAL context
     ctx_size = int.from_bytes(recv_exact(conn, 4), 'big')
     ctx_bytes = recv_exact(conn, ctx_size)
     context = ts.context_from(ctx_bytes)
 
-    # Receive and deserialize the encrypted hidden vector
     vec_size = int.from_bytes(recv_exact(conn, 4), 'big')
     enc_hidden = ts.ckks_vector_from(context, recv_exact(conn, vec_size))
 
     return context, enc_hidden
 
 def compute_encrypted_logits(enc_hidden, W2, b2):
-    """
-    Compute the encrypted logits by performing dot product between
-    the encrypted hidden vector and each row of W2, then adding the bias.
-    """
+    # Все вычисления выполняются над зашифрованными данными; сервер не видит содержимого enc_hidden
     enc_logits = []
     for i in range(10):
-        # Compute dot product and add bias
         score = enc_hidden.dot(W2[i].tolist()) + float(b2[i])
         enc_logits.append(score)
     return enc_logits
 
 def send_encrypted_logits(conn, enc_logits):
-    """
-    Serialize and send each encrypted logit to the client.
-    """
     for score in enc_logits:
         data = score.serialize()
         conn.sendall(len(data).to_bytes(4, 'big') + data)
 
 def start_server(host, port, model_path):
-    """
-    Start the server to receive encrypted data, perform computation,
-    and send back the encrypted results.
-    """
-    # Load model parameters
     W2, b2 = load_model_parameters(model_path)
 
-    # Set up the server socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((host, port))
         sock.listen(1)
@@ -78,40 +54,34 @@ def start_server(host, port, model_path):
             with conn:
                 print(f"Client connected from {addr}")
 
-                # Receive context and encrypted hidden vector
                 context, enc_hidden = receive_context_and_encrypted_vector(conn)
+                print("Server: Received encrypted data; performing computation on ciphertext (user data is not visible).")
 
-                # Compute encrypted logits
+                # Попытка расшифровки (демонстрация невозможности)
+                try:
+                    print("Attempting to decrypt encrypted vector on server...")
+                    dec = enc_hidden.decrypt()
+                    print("Decryption result (unexpected!):", dec)
+                except Exception as e:
+                    print("Decryption failed (as expected). Server does not have the secret key.")
+                    print("Error:", e)
+
                 enc_logits = compute_encrypted_logits(enc_hidden, W2, b2)
 
-                # Send encrypted logits back to the client
                 send_encrypted_logits(conn, enc_logits)
                 print("Encrypted logits sent to client.")
 
                 close_conn = input("Close connection? (y/n) ")
-
-                if close_conn == 'yes' or close_conn == 'y':
+                if close_conn.lower() in ['y', 'yes']:
                     break
 
         print("Closing connection.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--model",
-                        type=str,
-                        help="npz model data W1, b1, W2, b2. Default 'mnist_model_split.npz'",
-                        default="mnist_model_split.npz")
-    parser.add_argument("--host",
-                        type=str,
-                        help="hostname",
-                        default="127.0.0.1")
-    parser.add_argument("-p", "--port",
-                        type=int,
-                        help="port",
-                        default=9000)
+    parser.add_argument("-m", "--model", type=str, default="mnist_model_split.npz")
+    parser.add_argument("--host", type=str, default="127.0.0.1")
+    parser.add_argument("-p", "--port", type=int, default=9000)
     args = parser.parse_args()
 
-    HOST = args.host
-    PORT = args.port
-    MODEL_PATH = args.model
-    start_server(HOST, PORT, MODEL_PATH)
+    start_server(args.host, args.port, args.model)

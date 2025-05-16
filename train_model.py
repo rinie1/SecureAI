@@ -5,6 +5,8 @@ from torchvision import datasets, transforms
 import numpy as np
 import json
 
+# Обучение модели для защищённого инференса. Во время инференса данные пользователя остаются зашифрованными.
+
 # Аугментации для улучшения обобщающей способности модели
 transform = transforms.Compose([
     transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
@@ -44,7 +46,7 @@ for epoch in range(5):
         loss.backward()
         optimizer.step()
 
-# Сохранение параметров слоёв в формате JSON
+# Сохранение параметров слоёв
 W1 = model.fc1.weight.data.cpu().numpy().tolist()
 b1 = model.fc1.bias.data.cpu().numpy().tolist()
 W2 = model.fc2.weight.data.cpu().numpy().tolist()
