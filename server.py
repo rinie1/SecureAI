@@ -59,6 +59,7 @@ def start_server(host, port, model_path):
 
                 # Попытка расшифровки (демонстрация невозможности)
                 try:
+                    print("Enc vector:", enc_hidden.serialize()[:10])
                     print("Attempting to decrypt encrypted vector on server...")
                     dec = enc_hidden.decrypt()
                     print("Decryption result (unexpected!):", dec)
@@ -68,11 +69,13 @@ def start_server(host, port, model_path):
 
                 enc_logits = compute_encrypted_logits(enc_hidden, W2, b2)
 
+                print("Enc logits:", enc_logits[0].serialize()[:10])
+
                 send_encrypted_logits(conn, enc_logits)
                 print("Encrypted logits sent to client.")
 
                 close_conn = input("Close connection? (y/n) ")
-                if close_conn.lower() in ['y', 'yes']:
+                if close_conn.lower() not in ['n', 'no']:
                     break
 
         print("Closing connection.")
