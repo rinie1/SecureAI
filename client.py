@@ -4,7 +4,9 @@ from PIL import Image
 import tenseal as ts
 import argparse
 import json
-import subprocess
+from holst import SmoothDigitDrawer
+import tkinter as tk
+import os
 
 def recv_exact(sock, n):
     data = b''
@@ -90,10 +92,6 @@ def main():
     args = parser.parse_args()
 
     if args.image is None:
-        from holst import SmoothDigitDrawer
-        import tkinter as tk
-        import os
-
         root = tk.Tk()
         app = SmoothDigitDrawer(root)
         root.mainloop()
