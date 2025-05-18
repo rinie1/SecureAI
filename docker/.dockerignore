@@ -1,10 +1,7 @@
-# Исключаем всё, что не нужно в контейнере
 *
 !requirements.txt
 !server.py
-!client.py
 !model_params.json
 !mnist_model_split.npz
 !Dockerfile
-!Dockerfile.client
 !docker-compose.yml
