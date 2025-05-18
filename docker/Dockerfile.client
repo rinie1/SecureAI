@@ -1,0 +1,13 @@
+# Dockerfile for SecureAI headless client
+FROM python:3.13-slim
+
+RUN useradd --create-home appuser
+
+WORKDIR /app
+COPY ../requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ../client.py ../model_params.json ./
+
+USER appuser
+CMD ["python", "client.py", "--host", "server", "--port", "8000"]

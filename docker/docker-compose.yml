@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../mnist_model_split.npz:/app/mnist_model_split.npz
+      - ../model_params.json:/app/model_params.json
+
+  client:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.client
+    depends_on:
+      - server
+    environment:
+      - SERVER_HOST=server
+      - SERVER_PORT=8000
+    # для передачи изображения digit.png:
+    # - ./images:/app/images
