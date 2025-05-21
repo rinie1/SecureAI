@@ -41,7 +41,7 @@ def send_encrypted_logits(conn, enc_logits):
         data = score.serialize()
         conn.sendall(len(data).to_bytes(4, 'big') + data)
 
-def start_server(host, port, model_path, mode_docker):
+def start_server(host, port, model_path):
     W2, b2 = load_model_parameters(model_path)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -74,10 +74,9 @@ def start_server(host, port, model_path, mode_docker):
                 send_encrypted_logits(conn, enc_logits)
                 print("Encrypted logits sent to client.")
 
-                if not mode_docker:
-                    close_conn = input("Close connection? (y/n) ")
-                    if close_conn.lower() not in ['n', 'no']:
-                        break
+                close_conn = input("Close connection? (y/n) ")
+                if close_conn.lower() not in ['n', 'no']:
+                    break
 
         print("Closing connection.")
 
@@ -86,7 +85,6 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--model", type=str, default="mnist_model_split.npz")
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("-p", "--port", type=int, default=5000)
-    parser.add_argument("-d", "--docker", type=bool, default=False)
     args = parser.parse_args()
 
     start_server(args.host, args.port, args.model, args.docker)
