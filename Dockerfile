@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY /server/ /app/
 
 # Команда для запуска приложения
-CMD ["python", "server.py"]
+CMD ["python", "server.py --docker true"]
