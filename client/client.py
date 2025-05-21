@@ -87,8 +87,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--image", type=str, default=None)
     parser.add_argument("-m", "--model", type=str, default="model_params.json")
-    parser.add_argument("--host", type=str, default="127.0.0.1")
-    parser.add_argument("-p", "--port", type=int, default=9000)
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("-p", "--port", type=int, default=5000)
     args = parser.parse_args()
     if args.image is None:
 
