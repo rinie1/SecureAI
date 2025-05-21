@@ -1,15 +1,20 @@
-# Dockerfile for SecureAI server
-FROM python:3.13-slim
+# Используем официальный образ Python в качестве базового
+FROM python:3.10-slim
 
-RUN useradd --create-home appuser
-
+# Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
-COPY ../requirements.txt .
+
+# Копируем зависимости
+COPY ../server/requirements.txt .
+
+# Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ../server.py ../mnist_model_split.npz ../model_params.json ./
+# Копируем исходный код приложения
+COPY ../server/ .
 
-USER appuser
+# Указываем порт, который будет прослушиваться
+EXPOSE 5000
 
-EXPOSE 8000
-CMD ["python", "server.py"]
+# Команда для запуска приложения
+CMD ["python", "server.py", "--port 5000"]

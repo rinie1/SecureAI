@@ -3,10 +3,11 @@ version: '3.8'
 services:
   server:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "5000:5000"
     volumes:
-      - ../mnist_model_split.npz:/app/mnist_model_split.npz
-      - ../model_params.json:/app/model_params.json
+      - ../server:/app
+    environment:
+      - FLASK_ENV=development
