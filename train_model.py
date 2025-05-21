@@ -59,10 +59,10 @@ model_params = {
     "b2": b2
 }
 
-with open("model_params.json", "w") as f:
+with open("./client/model_params.json", "w") as f:
     json.dump(model_params, f)
 
 print("Модель обучена, и параметры сохранены в 'model_params.json'.")
 
-np.savez("mnist_model_split.npz", W1=W1, b1=b1, W2=W2, b2=b2)
+np.savez("./server/mnist_model_split.npz", W1=W1, b1=b1, W2=W2, b2=b2)
 print("Веса сохранены.")
