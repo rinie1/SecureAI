@@ -41,50 +41,67 @@ def send_encrypted_logits(conn, enc_logits):
         data = score.serialize()
         conn.sendall(len(data).to_bytes(4, 'big') + data)
 
-def start_server(host, port, model_path):
+def start_server(host, port, model_path, log_file):
     W2, b2 = load_model_parameters(model_path)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.bind((host, port))
         sock.listen(1)
+        f = open(log_file, "w")
         print(f"Server started at {host}:{port}, waiting for connection...")
+        f.write(f"Server started at {host}:{port}, waiting for connection...\n")
+        f.close()
 
         while True:
             conn, addr = sock.accept()
             with conn:
+                f = open(log_file, "a")
                 print(f"Client connected from {addr}")
+                f.write(f"Client connected from {addr}\n")
 
                 context, enc_hidden = receive_context_and_encrypted_vector(conn)
                 print("Server: Received encrypted data; performing computation on ciphertext (user data is not visible).")
+                f.write("Server: Received encrypted data; performing computation on ciphertext (user data is not visible).\n")
 
                 # Попытка расшифровки (демонстрация невозможности)
                 try:
                     print("Enc vector:", enc_hidden.serialize()[:10])
+                    f.write(f"Enc vector: {enc_hidden.serialize()[:10]}\n")
                     print("Attempting to decrypt encrypted vector on server...")
+                    f.write("Attempting to decrypt encrypted vector on server...\n")
                     dec = enc_hidden.decrypt()
                     print("Decryption result (unexpected!):", dec)
+                    f.write(f"Decryption result (unexpected!): {dec}\n")
                 except Exception as e:
                     print("Decryption failed (as expected). Server does not have the secret key.")
+                    f.write("Decryption failed (as expected). Server does not have the secret key.\n")
                     print("Error:", e)
+                    f.write(f"Error: {e}\n")
 
                 enc_logits = compute_encrypted_logits(enc_hidden, W2, b2)
 
                 print("Enc logits:", enc_logits[0].serialize()[:10])
+                f.write(f"Enc logits: {enc_logits[0].serialize()[:10]}\n")
 
                 send_encrypted_logits(conn, enc_logits)
                 print("Encrypted logits sent to client.")
+                f.write("Enc logist sent to client.\n")
 
                 close_conn = input("Close connection? (y/n) ")
                 if close_conn.lower() not in ['n', 'no']:
                     break
 
+                f.close()
+
         print("Closing connection.")
+        f.write("Closing connection\n")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--model", type=str, default="mnist_model_split.npz")
     parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("-p", "--port", type=int, default=5000)
+    parser.add_argument("-f", "--file", type=str, default="logs.txt")
     args = parser.parse_args()
 
-    start_server(args.host, args.port, args.model, args.docker)
+    start_server(args.host, args.port, args.model, args.file)
