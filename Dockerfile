@@ -1,16 +1,16 @@
 FROM python:3.10-slim
 
-# Устанавливаем рабочую директорию внутри контейнера
+# Set up a working directory inside the container
 WORKDIR /app
 
-# Копируем зависимости
+# Copying dependencies
 COPY /server/requirements.txt .
 
-# Устанавливаем зависимости
+# Installing dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем исходный код приложения
+# Copy the source code of the application
 COPY /server/ /app/
 
-# Команда для запуска приложения
+# Command to run the application
 CMD ["python", "server.py"]
