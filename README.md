@@ -72,7 +72,8 @@ If you are using your own model's weights, use --model (-m) [name.npz] flag on s
 Server saves logs in 'logs.txt', but you can save them in another file, use --file (-f) [file_name.txt].
 
 ## Docker
-Use Docker for building server image
+Use Docker for building server image.\
+Docker version 28.1.1
 ```sh
 cd SecureAI/
 docker build -t secureai-server .
